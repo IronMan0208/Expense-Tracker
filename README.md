@@ -20,8 +20,7 @@ A modern Android Expense Tracker App built using Kotlin and Jetpack Compose. Thi
 ## Screenshots
 
 <p align="center">
-
-  <img src="img.png" width="250">
+  <img src="https://github.com/user-attachments/assets/94cb504d-b984-4f51-ae6b-d75ac0e1f4e5" width="250">
 </p>
 
 ## Installation
