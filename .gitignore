@@ -1,0 +1,23 @@
+*.iml
+.gradle
+/local.properties
+/.idea
+/build
+/captures
+.externalNativeBuild
+.cxx
+
+# APK & Bundle
+*.apk
+*.aab
+
+# Keystore
+*.jks
+*.keystore
+
+# Logs
+*.log
+
+# OS Files
+.DS_Store
+Thumbs.db
