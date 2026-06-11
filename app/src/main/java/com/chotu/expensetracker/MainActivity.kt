@@ -32,6 +32,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -41,11 +42,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.chotu.expensetracker.data.database.DatabaseProvider
+import com.chotu.expensetracker.repository.ExpenseRepository
 import com.chotu.expensetracker.ui.theme.ExpenseTrackerTheme
+import com.chotu.expensetracker.viewmodel.ExpenseViewModel
+import com.chotu.expensetracker.viewmodel.ExpenseViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,16 +79,35 @@ val expenseColors = listOf(
 
 @Composable
 fun Expense_Tracker() {
+
+    val context = LocalContext.current
+    val database = remember {
+        DatabaseProvider.getDatabase(context)
+    }
+    val repository = remember {
+        ExpenseRepository(database.expenseDao())
+    }
+    val factory = remember {
+        ExpenseViewModelFactory(repository)
+    }
+    val viewModel: ExpenseViewModel = viewModel(
+        factory = factory
+    )
+
     var title by remember {
         mutableStateOf("")
     }
     var amount by remember {
         mutableStateOf("")
     }
-    val expenses = remember {
-        mutableStateListOf<Expense>()
+
+    val totalExpense = viewModel.expenses.sumOf {
+        it.amount
     }
-    val totalExpense = expenses.sumOf { it.amount }
+
+    LaunchedEffect(Unit) {
+        viewModel.loadExpenses()
+    }
 
     Box(
         modifier = Modifier
@@ -110,7 +137,7 @@ fun Expense_Tracker() {
                 color = Color.White
             )
             Text(
-                "${expenses.size} expenses added",
+                "${viewModel.expenses.size} expenses added",
                 fontSize = 13.sp,
                 color = Color.White.copy(alpha = 0.8f)
             )
@@ -198,11 +225,9 @@ fun Expense_Tracker() {
                         onClick = {
                             val amountValue = amount.toDoubleOrNull()
                             if (title.isNotEmpty() && amountValue != null) {
-                                expenses.add(
-                                    Expense(
-                                        title = title,
-                                        amount = amountValue
-                                    )
+                                viewModel.insertExpense(
+                                    title = title,
+                                    amount = amountValue
                                 )
                                 title = ""
                                 amount = ""
@@ -238,7 +263,7 @@ fun Expense_Tracker() {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                items(expenses.size) { index ->
+                items(viewModel.expenses.size) { index ->
                     val cardColor = expenseColors[index % expenseColors.size]
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -274,20 +299,22 @@ fun Expense_Tracker() {
                             Spacer(Modifier.width(12.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    expenses[index].title,
+                                    viewModel.expenses[index].title,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 16.sp,
                                     color = Color(0xFF222222)
                                 )
                                 Text(
-                                    text = "₹ ${"%.2f".format(expenses[index].amount)}",
+                                    text = "₹ ${"%.2f".format(viewModel.expenses[index].amount)}",
                                     fontSize = 14.sp,
                                     color = Color(0xFF444444)
                                 )
                             }
                             // Delete button
                             IconButton(
-                                onClick = { expenses.removeAt(index) },
+                                onClick = { viewModel.deleteExpense(
+                                    viewModel.expenses[index]
+                                ) },
                                 modifier = Modifier
                                     .size(36.dp)
                                     .background(
