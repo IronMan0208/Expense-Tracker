@@ -23,6 +23,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -34,7 +35,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -45,7 +45,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -67,6 +66,12 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+
+@Composable
+fun Expense_Tracker_Prev() {
+    Expense_Tracker()
+}
+
 val expenseColors = listOf(
     Color(0xFFD6F5D6), // soft green
     Color(0xFFFFE8C8), // soft orange
@@ -76,6 +81,7 @@ val expenseColors = listOf(
     Color(0xFFFFD6F0), // soft pink
     Color(0xFFFFD6D6), // soft red
 )
+
 
 @Composable
 fun Expense_Tracker() {
@@ -128,14 +134,35 @@ fun Expense_Tracker() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
 
-            //Header
-            Text(
-                "💰 Expense Tracker",
-                fontSize = 30.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color.White
-            )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "💰 Expense Tracker ",
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+
+                IconButton(
+                    onClick = { }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Menu,
+                        contentDescription = "Menu",
+                        tint = Color.White,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            }
             Text(
                 "${viewModel.expenses.size} expenses added",
                 fontSize = 13.sp,
@@ -312,9 +339,11 @@ fun Expense_Tracker() {
                             }
                             // Delete button
                             IconButton(
-                                onClick = { viewModel.deleteExpense(
-                                    viewModel.expenses[index]
-                                ) },
+                                onClick = {
+                                    viewModel.deleteExpense(
+                                        viewModel.expenses[index]
+                                    )
+                                },
                                 modifier = Modifier
                                     .size(36.dp)
                                     .background(
